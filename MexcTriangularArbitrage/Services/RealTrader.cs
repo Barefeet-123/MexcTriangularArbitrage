@@ -2,32 +2,45 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace MexcTriangularArbitrage.Services
 {
-    public class Purchaser
+    public class RealTrader
     {
-        HashSet<SymbolData> _symbolsHashSet;
+        readonly HashSet<SymbolData> _symbolsHashSet;
 
-        public Purchaser(HashSet<SymbolData> symbolsHashSet)
+        public RealTrader()
         {
-            _symbolsHashSet = symbolsHashSet;
+            _symbolsHashSet = QueryExecutor.GetAllTargetSymbols();
         }
 
-        public double ExecuteTriangleArbitrage(IReadOnlyList<SymbolTicker> symbolTickerList, IReadOnlyList<MarketDepth> marketDepthList, double usdt)
+        public double Execute()
         {
-            try
+            const double targetUsdtNum = 20;
+            const double targetRatio = 1.00001;
+
+            var triangularArbitrageExecutor = new CandidateGetter();
+            while (true)
             {
-                var currencyNum = usdt;
-                currencyNum = Bid(symbolTickerList[0], marketDepthList[0], currencyNum);
-                currencyNum = Bid(symbolTickerList[1], marketDepthList[1], currencyNum);
-                currencyNum = Ask(symbolTickerList[2], marketDepthList[2], currencyNum);
-                return currencyNum;
-            }
-            catch(Exception ex)
-            {
-                Utils.ErrorLog(ex);
-                return 0;
+                Thread.Sleep(1000);
+                foreach (var candidate in triangularArbitrageExecutor.Execute(targetUsdtNum, targetRatio))
+                {
+                    Console.WriteLine(candidate);
+                    try
+                    {
+                        var symbolTickerList = candidate.SymbolTickerList;
+                        var marketDepthList = candidate.MarketDepthList;
+                        var currencyNum = targetUsdtNum;
+                        currencyNum = Bid(symbolTickerList[0], marketDepthList[0], currencyNum);
+                        currencyNum = Bid(symbolTickerList[1], marketDepthList[1], currencyNum);
+                        currencyNum = Ask(symbolTickerList[2], marketDepthList[2], currencyNum);
+                    }
+                    catch (Exception ex)
+                    {
+                        Utils.ErrorLog(ex);
+                    }
+                }
             }
         }
 
@@ -85,12 +98,12 @@ namespace MexcTriangularArbitrage.Services
             var restSettlementQuantity = settlementCurrencyQuantity;
             foreach (var depthData in marketDepth.bids)
             {   
-                if (restSettlementQuantity * depthData.PriceAsDouble <= minAmount)
+                if (restSettlementQuantity <= minAmount)
                 {
                     break;
                 }
 
-                double sellableQuantity = Math.Min(restSettlementQuantity, depthData.QuantityAsDouble);
+                double sellableQuantity = Math.Min(restSettlementQuantity, depthData.QuantityAsDouble / depthData.PriceAsDouble); ;
 
                 var postData = new PlaceOrderPostData
                 {
@@ -117,8 +130,7 @@ namespace MexcTriangularArbitrage.Services
                 }
 
                 totalAmount += dealHistory.AmountAsDouble;
-                //var actualSoldQuantity = dealHistory.QuantityAsDouble;
-                restSettlementQuantity -= dealHistory.QuantityAsDouble;
+                restSettlementQuantity -= dealHistory.AmountAsDouble;
             }
             return totalAmount;
         }

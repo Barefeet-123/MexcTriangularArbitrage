@@ -131,9 +131,17 @@ namespace MexcTriangularArbitrage
         }
 
         #region public API
-        public static List<SymbolData> GetAllSymbols()
+
+        public static HashSet<SymbolData> GetAllTargetSymbols()
         {
-            return ExecuteGetRequest<List<SymbolData>>("https://www.mexc.com/open/api/v2/market/symbols");
+            return GetAllSymbols()
+                .Where(_ => _.state == "ENABLED" && _.etf_mark == 0)
+                .ToHashSet();
+        }
+
+        public static HashSet<SymbolData> GetAllSymbols()
+        {
+            return ExecuteGetRequest<HashSet<SymbolData>>("https://www.mexc.com/open/api/v2/market/symbols");
         }
 
         public static List<SymbolTicker> GetSymbolTickerInformation()

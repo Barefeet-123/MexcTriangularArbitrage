@@ -3,6 +3,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.CommandLine;
+using System.CommandLine.Invocation;
 
 namespace MexcTriangularArbitrage
 {
@@ -10,31 +12,70 @@ namespace MexcTriangularArbitrage
     {
         static void Main(string[] args)
         {
-            if (!File.Exists(GlobalSetting.TokenConfigPath))
+            var rootCommand = new RootCommand
+            {
+                Description = "Mexc triangular arbitrage executor / simurator"
+            };
+            var tradeCommand = new Command("trade")
+            {
+                Handler = CommandHandler.Create(TradeCommandHandler)
+            };
+
+            var simurateCommand = new Command("simurate")
+            {
+                Handler = CommandHandler.Create(SimurateCommandHandler)
+            };
+
+            var configCommand = new Command("config")
+            {
+                Handler = CommandHandler.Create<string>(ConfigCommandHandler)
+            };
+            configCommand.AddOption(new Option<string>("mode", () => "check", "check/recreate"));
+
+            rootCommand.AddCommand(tradeCommand);
+            rootCommand.AddCommand(simurateCommand);
+            rootCommand.AddCommand(configCommand);
+
+            rootCommand.Invoke(args);
+        }
+
+        static void TradeCommandHandler()
+        {
+            SetTokenConfigToGlobalSetting();
+
+            var readTrader = new RealTrader();
+            readTrader.Execute();
+        }
+
+        static void SimurateCommandHandler()
+        {
+            SetTokenConfigToGlobalSetting();
+
+            var simurator = new Simurator();
+            simurator.Execute();
+        }
+
+        static void ConfigCommandHandler(string mode)
+        {
+            if (mode.ToLowerInvariant() == "recreate")
             {
                 ConfigService.CreateTokenConfig();
+                return;
             }
             var tokenConfig = ConfigService.ReadTokenConfig();
-            GlobalSetting.TokenConfig = tokenConfig;
-
-            var allSymbols = QueryExecutor.GetAllSymbols();
-            var targetSymbolHashSet = allSymbols
-                .Where(_ => _.state == "ENABLED" && _.etf_mark == 0)
-                .ToHashSet();
-
-            var baseUsdt = 30;
-            var executor = new TrianglularArbitrageExecutor();
-            var purchaser = new Purchaser(targetSymbolHashSet);
-
-            while (true)
+            if (tokenConfig == null)
             {
-                Thread.Sleep(10000);
-                foreach (var c in executor.GetCandidates(baseUsdt, 1.00001))
-                {
-                    Console.WriteLine(c);
-                    var afterUsdt = purchaser.ExecuteTriangleArbitrage(c.SymbolTickerList, c.MarketDepthList, baseUsdt);
-                }
+                Console.WriteLine("No config file exists.");
+                return;
             }
+            Console.WriteLine(tokenConfig);
+        }
+
+        static void SetTokenConfigToGlobalSetting()
+        {
+            ConfigService.CreateTokenConfigIfNotExists();
+            var tokenConfig = ConfigService.ReadTokenConfig();
+            GlobalSetting.TokenConfig = tokenConfig;
         }
     }
 }

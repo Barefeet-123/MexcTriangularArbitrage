@@ -8,14 +8,12 @@ namespace MexcTriangularArbitrage.Schema
         public IReadOnlyList<SymbolTicker> SymbolTickerList { get; } 
         public IReadOnlyList<MarketDepth> MarketDepthList { get; }
         public double ProfitRatio { get; }
-        public double NumOfUsdt { get; }
 
         public TheoricalTriangularArbitrageResult(IReadOnlyList<SymbolTicker> symbolTickerList, IReadOnlyList<MarketDepth> marketDepthList, double profitRatio, double numOfUsdt)
         {
             SymbolTickerList = symbolTickerList;
             MarketDepthList = marketDepthList;
             ProfitRatio = profitRatio;
-            NumOfUsdt = numOfUsdt;
         }
 
         public override string ToString()

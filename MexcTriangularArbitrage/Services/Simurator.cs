@@ -9,33 +9,31 @@ namespace MexcTriangularArbitrage.Services
 {
     public class Simurator
     {
-        public double TotalProfitRatio => CurrentUsdt / StartUsdt;
-        private double StartUsdt { get; }
-        private double CurrentUsdt { get; set; } 
+        public double TotalProfitRatio => TotalConvertedUsdt / TotalBoughtUsdt;
 
-        public Simurator()
-        {
-            CurrentUsdt = StartUsdt = 10;
-        }
+        private double TotalBoughtUsdt { get; set; }
+        private double TotalConvertedUsdt { get; set; }
+
+        public Simurator() { }
 
         public void Execute()
         {
-            var executor = new TrianglularArbitrageExecutor();
+            const double targetUsdt = 20;
+            const double targetRatio = 0.99;
+
+            var candidateGetter = new CandidateGetter();
+            Console.WriteLine($"First,Second,Third,ProfitRatio,{nameof(TotalBoughtUsdt)},{nameof(TotalConvertedUsdt)},{nameof(TotalProfitRatio)}");
             while (true)
             {
-                Thread.Sleep(5000);
-                foreach (var c in executor.GetCandidates(CurrentUsdt, 1))
+                Thread.Sleep(1000);
+                foreach (var candidate in candidateGetter.Execute(targetUsdt, targetRatio))
                 {
-                    Console.WriteLine(c);
-                    AddProfit((c.ProfitRatio - 1) * CurrentUsdt);
-                    Console.WriteLine($"TotalProfitRatio = {TotalProfitRatio}");
+                    //Console.WriteLine(candidate);
+                    TotalBoughtUsdt += targetUsdt;
+                    TotalConvertedUsdt += candidate.ProfitRatio * targetUsdt;
+                    Console.WriteLine($"{candidate.SymbolTickerList[0].symbol},{candidate.SymbolTickerList[1].symbol},{candidate.SymbolTickerList[2].symbol},{candidate.ProfitRatio:F5},{TotalBoughtUsdt:F5},{TotalConvertedUsdt:F5},{TotalProfitRatio:F5}");
                 }
             }
-        }
-
-        public void AddProfit(double profitUsdt)
-        {
-            CurrentUsdt += profitUsdt;
         }
     }
 }

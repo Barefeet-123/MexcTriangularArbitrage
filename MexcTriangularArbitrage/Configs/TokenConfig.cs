@@ -10,5 +10,10 @@ namespace MexcTriangularArbitrage.Configs
     {
         public string AccessKey { get; set; }
         public string SecretKey { get; set; }
+
+        public override string ToString()
+        {
+            return $"AccessKey:{AccessKey}\nSecreatKey:{SecretKey}";
+        }
     }
 }

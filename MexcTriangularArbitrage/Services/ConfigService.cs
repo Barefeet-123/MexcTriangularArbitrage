@@ -35,5 +35,14 @@ namespace MexcTriangularArbitrage.Services
             var config = JsonSerializer.Deserialize<TokenConfig>(json);
             return config;
         }
+
+        public static void CreateTokenConfigIfNotExists()
+        {
+            if (File.Exists(GlobalSetting.TokenConfigPath))
+            {
+                return;
+            }
+            CreateTokenConfig();
+        }
     }
 }

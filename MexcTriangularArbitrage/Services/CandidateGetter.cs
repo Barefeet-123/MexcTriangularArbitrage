@@ -6,39 +6,22 @@ using System.Reflection;
 
 namespace MexcTriangularArbitrage.Services
 {
-    public class TrianglularArbitrageExecutor
+    public class CandidateGetter
     {
         private static HashSet<string> _startKeyCurrencyHashSet = new() { "ETH", "BTC" };
         private const string _startSttlementCurrency = "USDT";
-        private HashSet<string> _targetSymbolHashSet;
+        private readonly HashSet<string> _targetSymbolHashSet;
 
-        public TrianglularArbitrageExecutor()
+        public CandidateGetter()
         {
-            ResetSymbolData();
-        }
-
-        public void ResetSymbolData()
-        {
-            var allSymbols = QueryExecutor.GetAllSymbols();
-            _targetSymbolHashSet = allSymbols
-                .Where(_ => _.state == "ENABLED" && _.etf_mark == 0)
+            _targetSymbolHashSet = QueryExecutor.GetAllTargetSymbols()
                 .Select(_ => _.symbol)
                 .ToHashSet();
         }
 
-        public IEnumerable<TheoricalTriangularArbitrageResult> GetCandidates(double numOfUsdt, double minRatio = 1)
+        public IEnumerable<TheoricalTriangularArbitrageResult> Execute(double numOfUsdt, double minRatio = 1)
         {
-            List<SymbolTicker> symbolTickerInfoList;
-
-            try
-            {
-                symbolTickerInfoList = QueryExecutor.GetSymbolTickerInformation();
-            }
-            catch (Exception ex)
-            {
-                Utils.ErrorLog(ex);
-                yield break;
-            }
+            var symbolTickerInfoList = QueryExecutor.GetSymbolTickerInformation();
 
             var targetSymbolTickerInfoHash = symbolTickerInfoList
                 .Where(_ => _targetSymbolHashSet.Contains(_.symbol))
