@@ -19,7 +19,7 @@ namespace MexcTriangularArbitrage.Services
         public void Execute()
         {
             const double targetUsdt = 20;
-            const double targetRatio = 0.99;
+            const double targetRatio = 1.0001;
 
             var candidateGetter = new CandidateGetter();
             Console.WriteLine($"First,Second,Third,ProfitRatio,{nameof(TotalBoughtUsdt)},{nameof(TotalConvertedUsdt)},{nameof(TotalProfitRatio)}");
@@ -28,7 +28,6 @@ namespace MexcTriangularArbitrage.Services
                 Thread.Sleep(1000);
                 foreach (var candidate in candidateGetter.Execute(targetUsdt, targetRatio))
                 {
-                    //Console.WriteLine(candidate);
                     TotalBoughtUsdt += targetUsdt;
                     TotalConvertedUsdt += candidate.ProfitRatio * targetUsdt;
                     Console.WriteLine($"{candidate.SymbolTickerList[0].symbol},{candidate.SymbolTickerList[1].symbol},{candidate.SymbolTickerList[2].symbol},{candidate.ProfitRatio:F5},{TotalBoughtUsdt:F5},{TotalConvertedUsdt:F5},{TotalProfitRatio:F5}");

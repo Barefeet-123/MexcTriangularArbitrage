@@ -62,6 +62,7 @@ namespace MexcTriangularArbitrage
                 ConfigService.CreateTokenConfig();
                 return;
             }
+
             var tokenConfig = ConfigService.ReadTokenConfig();
             if (tokenConfig == null)
             {
