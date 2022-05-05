@@ -9,28 +9,28 @@ namespace MexcTriangularArbitrage.Services
 {
     public class Simurator
     {
-        public double TotalProfitRatio => TotalConvertedUsdt / TotalBoughtUsdt;
+        public double TotalProfitRatio => TotalConvertedUsdtQuantity / TotalBoughtUsdtQuantity;
 
-        private double TotalBoughtUsdt { get; set; }
-        private double TotalConvertedUsdt { get; set; }
+        private double TotalBoughtUsdtQuantity { get; set; }
+        private double TotalConvertedUsdtQuantity { get; set; }
 
         public Simurator() { }
 
         public void Execute()
         {
-            const double targetUsdt = 20;
+            const double targetUsdtQuantity = 20;
             const double targetRatio = 1.0001;
 
             var candidateGetter = new CandidateGetter();
-            Console.WriteLine($"First,Second,Third,ProfitRatio,{nameof(TotalBoughtUsdt)},{nameof(TotalConvertedUsdt)},{nameof(TotalProfitRatio)}");
+            Console.WriteLine($"First,Second,Third,ProfitRatio,{nameof(TotalBoughtUsdtQuantity)},{nameof(TotalConvertedUsdtQuantity)},{nameof(TotalProfitRatio)}");
             while (true)
             {
                 Thread.Sleep(1000);
-                foreach (var candidate in candidateGetter.Execute(targetUsdt, targetRatio))
+                foreach (var candidate in candidateGetter.Execute(targetUsdtQuantity, targetRatio))
                 {
-                    TotalBoughtUsdt += targetUsdt;
-                    TotalConvertedUsdt += candidate.ProfitRatio * targetUsdt;
-                    Console.WriteLine($"{candidate.SymbolTickerList[0].symbol},{candidate.SymbolTickerList[1].symbol},{candidate.SymbolTickerList[2].symbol},{candidate.ProfitRatio:F5},{TotalBoughtUsdt:F5},{TotalConvertedUsdt:F5},{TotalProfitRatio:F5}");
+                    TotalBoughtUsdtQuantity += targetUsdtQuantity;
+                    TotalConvertedUsdtQuantity += candidate.ProfitRatio * targetUsdtQuantity;
+                    Console.WriteLine($"{candidate.SymbolTickerList[0].symbol},{candidate.SymbolTickerList[1].symbol},{candidate.SymbolTickerList[2].symbol},{candidate.ProfitRatio:F5},{TotalBoughtUsdtQuantity:F5},{TotalConvertedUsdtQuantity:F5},{TotalProfitRatio:F5}");
                 }
             }
         }

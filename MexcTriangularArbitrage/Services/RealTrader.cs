@@ -17,24 +17,24 @@ namespace MexcTriangularArbitrage.Services
 
         public double Execute()
         {
-            const double targetUsdtNum = 20;
+            const double targetUsdtQuantity = 20;
             const double targetRatio = 1.00001;
 
             var triangularArbitrageExecutor = new CandidateGetter();
             while (true)
             {
                 Thread.Sleep(1000);
-                foreach (var candidate in triangularArbitrageExecutor.Execute(targetUsdtNum, targetRatio))
+                foreach (var candidate in triangularArbitrageExecutor.Execute(targetUsdtQuantity, targetRatio))
                 {
                     Console.WriteLine(candidate);
                     try
                     {
                         var symbolTickerList = candidate.SymbolTickerList;
                         var marketDepthList = candidate.MarketDepthList;
-                        var currencyNum = targetUsdtNum;
-                        currencyNum = Bid(symbolTickerList[0], marketDepthList[0], currencyNum);
-                        currencyNum = Bid(symbolTickerList[1], marketDepthList[1], currencyNum);
-                        currencyNum = Ask(symbolTickerList[2], marketDepthList[2], currencyNum);
+                        var currencyQuantity = targetUsdtQuantity;
+                        currencyQuantity = Bid(symbolTickerList[0], marketDepthList[0], currencyQuantity);
+                        currencyQuantity = Bid(symbolTickerList[1], marketDepthList[1], currencyQuantity);
+                        currencyQuantity = Ask(symbolTickerList[2], marketDepthList[2], currencyQuantity);
                     }
                     catch (Exception ex)
                     {
