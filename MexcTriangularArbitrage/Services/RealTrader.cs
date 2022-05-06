@@ -98,7 +98,7 @@ namespace MexcTriangularArbitrage.Services
             var restSettlementQuantity = settlementCurrencyQuantity;
             foreach (var depthData in marketDepth.bids)
             {   
-                if (restSettlementQuantity <= minAmount)
+                if (restSettlementQuantity * depthData.PriceAsDouble <= minAmount)
                 {
                     break;
                 }
