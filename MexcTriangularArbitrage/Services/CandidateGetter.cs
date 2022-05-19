@@ -8,7 +8,7 @@ namespace MexcTriangularArbitrage.Services
 {
     public class CandidateGetter
     {
-        private static HashSet<string> _startKeyCurrencyHashSet = new() { "ETH", "BTC" };
+        private static readonly HashSet<string> _startKeyCurrencyHashSet = new() { "ETH", "BTC" };
         private const string _startSttlementCurrency = "USDT";
         private readonly HashSet<string> _targetSymbolHashSet;
 
@@ -28,10 +28,13 @@ namespace MexcTriangularArbitrage.Services
                 .Where(_ => _startKeyCurrencyHashSet.Contains(_.SettlementCurrency))
                 .ToHashSet();
 
-            var targetKeyCurrencyHashSet = targetSymbolTickerInfoHash.Select(_ => _.KeyCurrency).ToHashSet();
+            var keyCurrencyForUsdtHashSet = targetSymbolTickerInfoHash
+                .Select(_ => _.KeyCurrency)
+                .Concat(_startKeyCurrencyHashSet)
+                .ToHashSet();
 
             var usdtSettledSymbolTickerHashSet = symbolTickerInfoList
-                .Where(_ => targetKeyCurrencyHashSet.Contains(_.KeyCurrency) && _.SettlementCurrency == _startSttlementCurrency)
+                .Where(_ => keyCurrencyForUsdtHashSet.Contains(_.KeyCurrency) && _.SettlementCurrency == _startSttlementCurrency)
                 .ToHashSet();
 
             foreach (var startKeyCurrency in _startKeyCurrencyHashSet)
