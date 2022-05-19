@@ -102,11 +102,11 @@ namespace MexcTriangularArbitrage.Services
                 throw new ArgumentException($"{nameof(symbolTickerList)} must contain 3 elements.");
             }
 
-            double numOfCurrency = 1.0; //USDTの枚数
-            numOfCurrency = (numOfCurrency / symbolTickerList[0].AskAsDouble) * (1.0 - feeRatio);  //二つ目の通貨の枚数: A/USDT でAの枚数を求めるので買う
-            numOfCurrency = (numOfCurrency / symbolTickerList[1].AskAsDouble) * (1.0 - feeRatio);  //三つ目の通貨の枚数: B/A   でBの枚数を求めるので買う
-            numOfCurrency = (symbolTickerList[2].BidAsDouble * numOfCurrency) * (1.0 - feeRatio);  //USDTに戻った時の枚数: B/USDT でUSDTの枚数を求めるので売る
-            return numOfCurrency;
+            double currencyQuantity = 1.0; //USDTの枚数
+            currencyQuantity = (currencyQuantity / symbolTickerList[0].AskAsDouble) * (1.0 - feeRatio);  //二つ目の通貨の枚数: A/USDT でAの枚数を求めるので買う
+            currencyQuantity = (currencyQuantity / symbolTickerList[1].AskAsDouble) * (1.0 - feeRatio);  //三つ目の通貨の枚数: B/A   でBの枚数を求めるので買う
+            currencyQuantity = (symbolTickerList[2].BidAsDouble * currencyQuantity) * (1.0 - feeRatio);  //USDTに戻った時の枚数: B/USDT でUSDTの枚数を求めるので売る
+            return currencyQuantity;
         }
 
         /// <summary>
@@ -117,11 +117,11 @@ namespace MexcTriangularArbitrage.Services
         /// <param name="second"></param>
         /// <param name="third"></param>
         /// <param name="feeRatio"></param>
-        /// <param name="numOfUsdt"></param>
+        /// <param name="usdtQuantity"></param>
         /// <returns></returns>
-        private static double GetProfitRatio(List<MarketDepth> marketDepthList, double numOfUsdt, double feeRatio = 0.0016)
+        private static double GetProfitRatio(List<MarketDepth> marketDepthList, double usdtQuantity, double feeRatio = 0.0016)
         {
-            if (numOfUsdt == 0)
+            if (usdtQuantity == 0)
             {
                 return 0;
             }
@@ -131,49 +131,49 @@ namespace MexcTriangularArbitrage.Services
                 throw new ArgumentException($"{nameof(marketDepthList)} must contain 3 elements.");
             }
 
-            double numOfCurrency = numOfUsdt; //USDTの枚数
-            numOfCurrency = GetActualBoughtNum(marketDepthList[0], numOfCurrency) * (1.0 - feeRatio); ;  //二つ目の通貨の枚数: A/USDT でAの枚数を求めるので買う
-            numOfCurrency = GetActualBoughtNum(marketDepthList[1], numOfCurrency) * (1.0 - feeRatio); ; //三つ目の通貨の枚数: B/A   でBの枚数を求めるので買う
-            numOfCurrency = GetActualSoldNum(marketDepthList[2], numOfCurrency) * (1.0 - feeRatio); ;     //USDTに戻った時の枚数: B/USDT でUSDTの枚数を求めるので売る
-            return numOfCurrency / numOfUsdt;
+            double currencyQuantity = usdtQuantity; //USDTの枚数
+            currencyQuantity = GetActualBidQuantity(marketDepthList[0], currencyQuantity) * (1.0 - feeRatio); ;  //二つ目の通貨の枚数: A/USDT でAの枚数を求めるので買う
+            currencyQuantity = GetActualBidQuantity(marketDepthList[1], currencyQuantity) * (1.0 - feeRatio); ; //三つ目の通貨の枚数: B/A   でBの枚数を求めるので買う
+            currencyQuantity = GetActualAskQuantity(marketDepthList[2], currencyQuantity) * (1.0 - feeRatio); ;     //USDTに戻った時の枚数: B/USDT でUSDTの枚数を求めるので売る
+            return currencyQuantity / usdtQuantity;
         }
 
-        private static double GetActualBoughtNum(MarketDepth marketDepth, double keyCurrencyNum)
+        private static double GetActualBidQuantity(MarketDepth marketDepth, double keyCurrencyQuantity)
         {
-            var restNum = keyCurrencyNum;
-            var totalConvertedNum = 0.0;
+            var restQuantity = keyCurrencyQuantity;
+            var totalConvertedQuantity = 0.0;
             foreach (var depthData in marketDepth.asks)
             {
-                if (restNum <= 0)
+                if (restQuantity <= 0)
                 {
                     break;
                 }
 
-                double buyable = restNum / depthData.PriceAsDouble;
+                double buyable = restQuantity / depthData.PriceAsDouble;
                 double bought = Math.Min(buyable, depthData.QuantityAsDouble);
-                totalConvertedNum += bought;
-                restNum = (buyable - bought) * depthData.PriceAsDouble;
+                totalConvertedQuantity += bought;
+                restQuantity = (buyable - bought) * depthData.PriceAsDouble;
             }
-            return totalConvertedNum;
+            return totalConvertedQuantity;
         }
 
-        private static double GetActualSoldNum(MarketDepth marketDepth, double settlementCurrencyNum)
+        private static double GetActualAskQuantity(MarketDepth marketDepth, double settlementCurrencyQuantity)
         {
-            var restNum = settlementCurrencyNum;
-            var totalConvertedNum = 0.0;
+            var restQuantity = settlementCurrencyQuantity;
+            var totalConvertedQuantity = 0.0;
             foreach (var depthData in marketDepth.bids)
             {
-                if (restNum <= 0)
+                if (restQuantity <= 0)
                 {
                     break;
                 }
 
-                double sellable = restNum;
+                double sellable = restQuantity;
                 double sold = Math.Min(sellable, depthData.QuantityAsDouble);
-                totalConvertedNum += sold * depthData.PriceAsDouble;
-                restNum = sellable - sold;
+                totalConvertedQuantity += sold * depthData.PriceAsDouble;
+                restQuantity = sellable - sold;
             }
-            return totalConvertedNum;
+            return totalConvertedQuantity;
         }
     }
 }
