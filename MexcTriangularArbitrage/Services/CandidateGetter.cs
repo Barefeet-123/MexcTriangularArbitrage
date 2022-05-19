@@ -28,15 +28,13 @@ namespace MexcTriangularArbitrage.Services
                 .Where(_ => _startKeyCurrencyHashSet.Contains(_.SettlementCurrency))
                 .ToHashSet();
 
-            var targetSymbolList = targetSymbolTickerInfoHash.Select(_ => _.KeyCurrency).ToHashSet();
+            var targetKeyCurrencyHashSet = targetSymbolTickerInfoHash.Select(_ => _.KeyCurrency).ToHashSet();
 
             var usdtSettledSymbols = symbolTickerInfoList
-                .Where(_ => targetSymbolList.Contains(_.KeyCurrency) && _.SettlementCurrency == _startSttlementCurrency)
+                .Where(_ => targetKeyCurrencyHashSet.Contains(_.KeyCurrency) && _.SettlementCurrency == _startSttlementCurrency)
                 .ToList();
 
             var startSymbols = _startKeyCurrencyHashSet.Select(_ => $"{_}_{_startSttlementCurrency}");
-
-            var theoricalResultList = new List<TheoricalTriangularArbitrageResult>();
 
             foreach (var startKeyCurrency in _startKeyCurrencyHashSet)
             {
@@ -132,7 +130,7 @@ namespace MexcTriangularArbitrage.Services
                 throw new ArgumentException($"{nameof(marketDepthList)} must contain 3 elements.");
             }
 
-            double numOfCurrency = numOfUsdt; //ドルの枚数
+            double numOfCurrency = numOfUsdt; //USDTの枚数
             numOfCurrency = GetActualBoughtNum(marketDepthList[0], numOfCurrency) * (1.0 - feeRatio); ;  //二つ目の通貨の枚数: A/USDT でAの枚数を求めるので買う
             numOfCurrency = GetActualBoughtNum(marketDepthList[1], numOfCurrency) * (1.0 - feeRatio); ; //三つ目の通貨の枚数: B/A   でBの枚数を求めるので買う
             numOfCurrency = GetActualSoldNum(marketDepthList[2], numOfCurrency) * (1.0 - feeRatio); ;     //USDTに戻った時の枚数: B/USDT でUSDTの枚数を求めるので売る

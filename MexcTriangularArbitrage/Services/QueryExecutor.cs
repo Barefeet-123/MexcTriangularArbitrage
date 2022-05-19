@@ -104,8 +104,15 @@ namespace MexcTriangularArbitrage
                 EnsureRequestsRate();
                 var httpResponse = client.GetAsync(url).Result;
                 var responseJson = httpResponse.Content.ReadAsStringAsync().Result;
-                var responseData = JsonSerializer.Deserialize<MexcResponseData<TDataType>>(responseJson);
-                return responseData.data;
+                try { 
+                    var responseData = JsonSerializer.Deserialize<MexcResponseData<TDataType>>(responseJson);
+                    return responseData.data;
+                }
+                catch
+                {
+                    Utils.ErrorLog($"Deserialize failed: {responseJson}");
+                    throw;
+                }
             });
         }
 
@@ -125,8 +132,16 @@ namespace MexcTriangularArbitrage
                 var content = new StringContent(bodyJson, Encoding.UTF8, @"application/json");
                 var httpResponse = client.PostAsync(url, content).Result;
                 var responseJson = httpResponse.Content.ReadAsStringAsync().Result;
-                var responseData = JsonSerializer.Deserialize<MexcResponseData<TDataType>>(responseJson);
-                return responseData.data;
+                try
+                {
+                    var responseData = JsonSerializer.Deserialize<MexcResponseData<TDataType>>(responseJson);
+                    return responseData.data;
+                }
+                catch
+                {
+                    Utils.ErrorLog($"Deserialize failed: {responseJson}");
+                    throw;
+                }
             });
         }
 
