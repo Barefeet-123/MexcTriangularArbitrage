@@ -34,8 +34,6 @@ namespace MexcTriangularArbitrage.Services
                 .Where(_ => targetKeyCurrencyHashSet.Contains(_.KeyCurrency) && _.SettlementCurrency == _startSttlementCurrency)
                 .ToList();
 
-            var startSymbols = _startKeyCurrencyHashSet.Select(_ => $"{_}_{_startSttlementCurrency}");
-
             foreach (var startKeyCurrency in _startKeyCurrencyHashSet)
             {
                 var first = usdtSettledSymbols.FirstOrDefault(_ => _.KeyCurrency == startKeyCurrency);
