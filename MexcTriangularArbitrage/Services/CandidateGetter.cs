@@ -30,13 +30,13 @@ namespace MexcTriangularArbitrage.Services
 
             var targetKeyCurrencyHashSet = targetSymbolTickerInfoHash.Select(_ => _.KeyCurrency).ToHashSet();
 
-            var usdtSettledSymbols = symbolTickerInfoList
+            var usdtSettledSymbolTickerHashSet = symbolTickerInfoList
                 .Where(_ => targetKeyCurrencyHashSet.Contains(_.KeyCurrency) && _.SettlementCurrency == _startSttlementCurrency)
-                .ToList();
+                .ToHashSet();
 
             foreach (var startKeyCurrency in _startKeyCurrencyHashSet)
             {
-                var first = usdtSettledSymbols.FirstOrDefault(_ => _.KeyCurrency == startKeyCurrency);
+                var first = usdtSettledSymbolTickerHashSet.FirstOrDefault(_ => _.KeyCurrency == startKeyCurrency);
                 
                 if (first == null)
                 {
@@ -45,7 +45,7 @@ namespace MexcTriangularArbitrage.Services
 
                 foreach (var second in targetSymbolTickerInfoHash.Where(_ => _.SettlementCurrency == startKeyCurrency))
                 {
-                    var third = usdtSettledSymbols.FirstOrDefault(_ => _.KeyCurrency == second.KeyCurrency);
+                    var third = usdtSettledSymbolTickerHashSet.FirstOrDefault(_ => _.KeyCurrency == second.KeyCurrency);
                     
                     if (third == null)
                     {
