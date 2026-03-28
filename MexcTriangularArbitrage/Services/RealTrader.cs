@@ -57,7 +57,9 @@ namespace MexcTriangularArbitrage.Services
         {
             var totalQuantity = 0.0;
             var restAmount = keyCurrencyQuantity;
-            var minAmount = _symbolsHashSet.FirstOrDefault(_ => _.symbol == symbolTicker.symbol).MinAmountAsDouble;
+            var symbolData = _symbolsHashSet.FirstOrDefault(_ => _.symbol == symbolTicker.symbol);
+            if (symbolData == null) return 0;
+            var minAmount = symbolData.MinAmountAsDouble;
             foreach (var depthData in marketDepth.asks)
             {
                 if (restAmount <= minAmount)
@@ -103,7 +105,9 @@ namespace MexcTriangularArbitrage.Services
         private double Ask(SymbolTicker symbolTicker, MarketDepth marketDepth, double settlementCurrencyQuantity)
         {
             var totalAmount = 0.0;
-            var minAmount = _symbolsHashSet.FirstOrDefault(_ => _.symbol == symbolTicker.symbol).MinAmountAsDouble;
+            var symbolData = _symbolsHashSet.FirstOrDefault(_ => _.symbol == symbolTicker.symbol);
+            if (symbolData == null) return 0;
+            var minAmount = symbolData.MinAmountAsDouble;
             var restSettlementQuantity = settlementCurrencyQuantity;
             foreach (var depthData in marketDepth.bids)
             {   
