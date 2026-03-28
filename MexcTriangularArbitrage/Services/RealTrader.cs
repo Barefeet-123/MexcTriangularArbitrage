@@ -21,6 +21,7 @@ namespace MexcTriangularArbitrage.Services
             const double targetRatio = 1.00001;
 
             var triangularArbitrageExecutor = new CandidateGetter();
+            using var historyWriter = new TradeHistoryWriter(GlobalSetting.TradeHistoryPath);
             while (true)
             {
                 Thread.Sleep(1000);
@@ -35,6 +36,14 @@ namespace MexcTriangularArbitrage.Services
                         currencyQuantity = Bid(symbolTickerList[0], marketDepthList[0], currencyQuantity);
                         currencyQuantity = Bid(symbolTickerList[1], marketDepthList[1], currencyQuantity);
                         currencyQuantity = Ask(symbolTickerList[2], marketDepthList[2], currencyQuantity);
+
+                        historyWriter.Write(
+                            symbolTickerList[0].symbol,
+                            symbolTickerList[1].symbol,
+                            symbolTickerList[2].symbol,
+                            candidate.ProfitRatio,
+                            targetUsdtQuantity,
+                            currencyQuantity);
                     }
                     catch (Exception ex)
                     {
