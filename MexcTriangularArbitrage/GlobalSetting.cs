@@ -10,6 +10,8 @@ namespace MexcTriangularArbitrage
         internal static string ExeDirectory { get;} = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         internal static string ConfigDirectory { get; } = Path.Combine(ExeDirectory, "config");
         internal static string TokenConfigPath { get; } = Path.Combine(ConfigDirectory, "token_config.json");
-        internal static TokenConfig TokenConfig { get; set; } 
+        internal static string TradeHistoryPath { get; } = Path.Combine(ExeDirectory, "logs",
+            $"trade_history_{System.DateTime.Now:yyyyMMdd}.csv");
+        internal static TokenConfig TokenConfig { get; set; }
     }
 }
