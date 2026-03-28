@@ -13,6 +13,7 @@ namespace MexcTriangularArbitrage
 {
     public static class QueryExecutor
     {
+        private static readonly HttpClient _httpClient = new();
         private static int _callCount = 0;
         private static readonly object _lockObj = new();
         private static Stopwatch _stopWatch;
@@ -94,15 +95,15 @@ namespace MexcTriangularArbitrage
         {
             return Utils.RetryDo(() =>
             {
-                var client = new HttpClient();
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
                 if (signVo != null)
                 {
-                    client.DefaultRequestHeaders.Add("ApiKey", signVo.AccessKey);
-                    client.DefaultRequestHeaders.Add("Signature", GetSign(signVo));
-                    client.DefaultRequestHeaders.Add("Request-Time", signVo.ReqTime.ToString());
+                    request.Headers.Add("ApiKey", signVo.AccessKey);
+                    request.Headers.Add("Signature", GetSign(signVo));
+                    request.Headers.Add("Request-Time", signVo.ReqTime.ToString());
                 }
                 EnsureRequestsRate();
-                var httpResponse = client.GetAsync(url).Result;
+                var httpResponse = _httpClient.Send(request);
                 var responseJson = httpResponse.Content.ReadAsStringAsync().Result;
                 try { 
                     var responseData = JsonSerializer.Deserialize<MexcResponseData<TDataType>>(responseJson);
@@ -120,17 +121,17 @@ namespace MexcTriangularArbitrage
         {
             return Utils.RetryDo(() =>
             {
-                var client = new HttpClient();
+                using var request = new HttpRequestMessage(HttpMethod.Post, url);
                 if (signVo != null)
                 {
-                    client.DefaultRequestHeaders.Add("ApiKey", signVo.AccessKey);
-                    client.DefaultRequestHeaders.Add("Signature", GetSign(signVo));
-                    client.DefaultRequestHeaders.Add("Request-Time", signVo.ReqTime.ToString());
+                    request.Headers.Add("ApiKey", signVo.AccessKey);
+                    request.Headers.Add("Signature", GetSign(signVo));
+                    request.Headers.Add("Request-Time", signVo.ReqTime.ToString());
                 }
                 EnsureRequestsRate();
 
-                var content = new StringContent(bodyJson, Encoding.UTF8, @"application/json");
-                var httpResponse = client.PostAsync(url, content).Result;
+                request.Content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
+                var httpResponse = _httpClient.Send(request);
                 var responseJson = httpResponse.Content.ReadAsStringAsync().Result;
                 try
                 {
