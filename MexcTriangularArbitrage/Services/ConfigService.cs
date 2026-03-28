@@ -44,5 +44,29 @@ namespace MexcTriangularArbitrage.Services
             }
             CreateTokenConfig();
         }
+
+        public static TradeConfig ReadTradeConfig()
+        {
+            if (!File.Exists(GlobalSetting.TradeConfigPath))
+            {
+                return new TradeConfig();
+            }
+            using var streamReader = new StreamReader(GlobalSetting.TradeConfigPath);
+            var json = streamReader.ReadToEnd();
+            return JsonSerializer.Deserialize<TradeConfig>(json) ?? new TradeConfig();
+        }
+
+        public static void WriteTradeConfig(TradeConfig config)
+        {
+            Directory.CreateDirectory(GlobalSetting.ConfigDirectory);
+            var json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
+            using var streamWriter = new StreamWriter(GlobalSetting.TradeConfigPath, false, Encoding.UTF8);
+            streamWriter.Write(json);
+        }
+
+        public static void LoadTradeConfigToGlobalSetting()
+        {
+            GlobalSetting.TradeConfig = ReadTradeConfig();
+        }
     }
 }

@@ -18,8 +18,8 @@ namespace MexcTriangularArbitrage.Services
 
         public void Execute()
         {
-            const double targetUsdtQuantity = 20;
-            const double targetRatio = 1.0001;
+            var targetUsdtQuantity = GlobalSetting.TradeConfig.TargetUsdtQuantity;
+            var targetRatio = GlobalSetting.TradeConfig.SimulationTargetRatio;
 
             var candidateGetter = new CandidateGetter();
             Console.WriteLine($"First,Second,Third,ProfitRatio,{nameof(TotalBoughtUsdtQuantity)},{nameof(TotalConvertedUsdtQuantity)},{nameof(TotalProfitRatio)}");

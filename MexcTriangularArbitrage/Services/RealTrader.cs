@@ -17,8 +17,8 @@ namespace MexcTriangularArbitrage.Services
 
         public double Execute()
         {
-            const double targetUsdtQuantity = 20;
-            const double targetRatio = 1.00001;
+            var targetUsdtQuantity = GlobalSetting.TradeConfig.TargetUsdtQuantity;
+            var targetRatio = GlobalSetting.TradeConfig.TradeTargetRatio;
 
             var triangularArbitrageExecutor = new CandidateGetter();
             using var historyWriter = new TradeHistoryWriter(GlobalSetting.TradeHistoryPath);
