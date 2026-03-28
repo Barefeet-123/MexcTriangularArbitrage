@@ -1,21 +1,24 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 
 namespace MexcTriangularArbitrage
 {
     public class Utils
     {
-        public static void ErrorLog(object message, 
+        private static ILogger _logger = AppLogger.CreateLogger<Utils>();
+
+        public static void ErrorLog(object message,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
-            //TODO: Implement logging method
-            Console.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} Error {memberName},{sourceFilePath}:{sourceLineNumber} Message:[{message}]");
+            _logger.LogError("{MemberName},{SourceFilePath}:{SourceLineNumber} Message:[{Message}]",
+                memberName, sourceFilePath, sourceLineNumber, message);
         }
 
         public static T RetryDo<T>(
-            Func<T> func, 
+            Func<T> func,
             int count = 3,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
@@ -28,8 +31,9 @@ namespace MexcTriangularArbitrage
                 }
                 catch(Exception ex)
                 {
-                    var message = $"Error in RetryDo. Caller:[{memberName},{sourceFilePath}:{sourceLineNumber}], Exception:[{ex}]";
-                    ErrorLog(message);
+                    _logger.LogWarning(ex,
+                        "RetryDo attempt {Attempt}/{Count} failed. Caller:[{MemberName},{SourceFilePath}:{SourceLineNumber}]",
+                        i, count, memberName, sourceFilePath, sourceLineNumber);
                 }
             }
             return func();
