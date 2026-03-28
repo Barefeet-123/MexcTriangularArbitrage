@@ -119,7 +119,7 @@ namespace MexcTriangularArbitrage.Services
         /// <param name="feeRatio"></param>
         /// <param name="usdtQuantity"></param>
         /// <returns></returns>
-        private static double GetProfitRatio(List<MarketDepth> marketDepthList, double usdtQuantity, double feeRatio = 0.0016)
+        internal static double GetProfitRatio(List<MarketDepth> marketDepthList, double usdtQuantity, double feeRatio = 0.0016)
         {
             if (usdtQuantity == 0)
             {
@@ -138,7 +138,7 @@ namespace MexcTriangularArbitrage.Services
             return currencyQuantity / usdtQuantity;
         }
 
-        private static double GetActualBidQuantity(MarketDepth marketDepth, double keyCurrencyQuantity)
+        internal static double GetActualBidQuantity(MarketDepth marketDepth, double keyCurrencyQuantity)
         {
             var restQuantity = keyCurrencyQuantity;
             var totalConvertedQuantity = 0.0;
@@ -157,7 +157,7 @@ namespace MexcTriangularArbitrage.Services
             return totalConvertedQuantity;
         }
 
-        private static double GetActualAskQuantity(MarketDepth marketDepth, double settlementCurrencyQuantity)
+        internal static double GetActualAskQuantity(MarketDepth marketDepth, double settlementCurrencyQuantity)
         {
             var restQuantity = settlementCurrencyQuantity;
             var totalConvertedQuantity = 0.0;
