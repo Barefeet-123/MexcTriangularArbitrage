@@ -7,12 +7,12 @@ namespace MexcTriangularArbitrage
     {
         static void Main(string[] args)
         {
-            var rootCommand = new RootCommand("Mexc triangular arbitrage executor / simurator");
+            var rootCommand = new RootCommand("Mexc triangular arbitrage executor / simulator");
 
             var tradeCommand = new Command("trade");
             tradeCommand.SetHandler(TradeCommandHandler);
 
-            var simurateCommand = new Command("simurate");
+            var simurateCommand = new Command("simulate");
             simurateCommand.SetHandler(SimurateCommandHandler);
 
             var modeOption = new Option<string>("--mode", () => "check", "check/recreate");
@@ -39,8 +39,8 @@ namespace MexcTriangularArbitrage
         {
             SetTokenConfigToGlobalSetting();
 
-            var simurator = new Simurator();
-            simurator.Execute();
+            var simulator = new Simulator();
+            simulator.Execute();
         }
 
         static void ConfigCommandHandler(string mode)
