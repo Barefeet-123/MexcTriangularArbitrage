@@ -9,7 +9,7 @@ namespace MexcTriangularArbitrage.Services
 {
     public class Simulator
     {
-        public double TotalProfitRatio => TotalConvertedUsdtQuantity / TotalBoughtUsdtQuantity;
+        public double TotalProfitRatio => TotalBoughtUsdtQuantity == 0 ? 0 : TotalConvertedUsdtQuantity / TotalBoughtUsdtQuantity;
 
         private double TotalBoughtUsdtQuantity { get; set; }
         private double TotalConvertedUsdtQuantity { get; set; }
