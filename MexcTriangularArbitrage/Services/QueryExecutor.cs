@@ -76,7 +76,7 @@ namespace MexcTriangularArbitrage
 
         private static string UrlEncode(string s)
         {
-            return System.Web.HttpUtility.UrlEncode(s, Encoding.UTF8).Replace("\\+", "%20");
+            return System.Web.HttpUtility.UrlEncode(s, Encoding.UTF8).Replace("+", "%20");
         }
 
         private static SignVo CreateNewSignVo(string requestParam)

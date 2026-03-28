@@ -1,10 +1,5 @@
 ﻿using MexcTriangularArbitrage.Services;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 
 namespace MexcTriangularArbitrage
 {
@@ -12,25 +7,18 @@ namespace MexcTriangularArbitrage
     {
         static void Main(string[] args)
         {
-            var rootCommand = new RootCommand
-            {
-                Description = "Mexc triangular arbitrage executor / simurator"
-            };
-            var tradeCommand = new Command("trade")
-            {
-                Handler = CommandHandler.Create(TradeCommandHandler)
-            };
+            var rootCommand = new RootCommand("Mexc triangular arbitrage executor / simurator");
 
-            var simurateCommand = new Command("simurate")
-            {
-                Handler = CommandHandler.Create(SimurateCommandHandler)
-            };
+            var tradeCommand = new Command("trade");
+            tradeCommand.SetHandler(TradeCommandHandler);
 
-            var configCommand = new Command("config")
-            {
-                Handler = CommandHandler.Create<string>(ConfigCommandHandler)
-            };
-            configCommand.AddOption(new Option<string>("mode", () => "check", "check/recreate"));
+            var simurateCommand = new Command("simurate");
+            simurateCommand.SetHandler(SimurateCommandHandler);
+
+            var modeOption = new Option<string>("--mode", () => "check", "check/recreate");
+            var configCommand = new Command("config");
+            configCommand.AddOption(modeOption);
+            configCommand.SetHandler((string mode) => ConfigCommandHandler(mode), modeOption);
 
             rootCommand.AddCommand(tradeCommand);
             rootCommand.AddCommand(simurateCommand);
