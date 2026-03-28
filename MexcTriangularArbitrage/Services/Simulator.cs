@@ -16,18 +16,20 @@ namespace MexcTriangularArbitrage.Services
 
         public Simulator() { }
 
-        public void Execute()
+        public void Execute(CancellationToken cancellationToken = default)
         {
             var targetUsdtQuantity = GlobalSetting.TradeConfig.TargetUsdtQuantity;
             var targetRatio = GlobalSetting.TradeConfig.SimulationTargetRatio;
 
             var candidateGetter = new CandidateGetter();
             Console.WriteLine($"First,Second,Third,ProfitRatio,{nameof(TotalBoughtUsdtQuantity)},{nameof(TotalConvertedUsdtQuantity)},{nameof(TotalProfitRatio)}");
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
-                Thread.Sleep(1000);
+                Task.Delay(1000, cancellationToken).Wait(cancellationToken);
+                if (cancellationToken.IsCancellationRequested) break;
                 foreach (var candidate in candidateGetter.Execute(targetUsdtQuantity, targetRatio))
                 {
+                    if (cancellationToken.IsCancellationRequested) break;
                     TotalBoughtUsdtQuantity += targetUsdtQuantity;
                     TotalConvertedUsdtQuantity += candidate.ProfitRatio * targetUsdtQuantity;
                     Console.WriteLine($"{candidate.SymbolTickerList[0].symbol},{candidate.SymbolTickerList[1].symbol},{candidate.SymbolTickerList[2].symbol},{candidate.ProfitRatio:F5},{TotalBoughtUsdtQuantity:F5},{TotalConvertedUsdtQuantity:F5},{TotalProfitRatio:F5}");

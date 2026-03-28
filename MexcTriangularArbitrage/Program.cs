@@ -1,5 +1,7 @@
-﻿using MexcTriangularArbitrage.Services;
+using MexcTriangularArbitrage.Services;
+using System;
 using System.CommandLine;
+using System.Threading;
 
 namespace MexcTriangularArbitrage
 {
@@ -31,16 +33,32 @@ namespace MexcTriangularArbitrage
         {
             SetTokenConfigToGlobalSetting();
 
+            using var cts = new CancellationTokenSource();
+            Console.CancelKeyPress += (_, e) =>
+            {
+                e.Cancel = true;
+                Console.WriteLine("Stopping...");
+                cts.Cancel();
+            };
+
             var readTrader = new RealTrader();
-            readTrader.Execute();
+            readTrader.Execute(cts.Token);
         }
 
         static void SimurateCommandHandler()
         {
             SetTokenConfigToGlobalSetting();
 
+            using var cts = new CancellationTokenSource();
+            Console.CancelKeyPress += (_, e) =>
+            {
+                e.Cancel = true;
+                Console.WriteLine("Stopping...");
+                cts.Cancel();
+            };
+
             var simulator = new Simulator();
-            simulator.Execute();
+            simulator.Execute(cts.Token);
         }
 
         static void ConfigCommandHandler(string mode)
