@@ -1,8 +1,9 @@
-﻿using MexcTriangularArbitrage.Schema;
+using MexcTriangularArbitrage.Schema;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MexcTriangularArbitrage.Services
 {
@@ -15,18 +16,20 @@ namespace MexcTriangularArbitrage.Services
             _symbolsHashSet = QueryExecutor.GetAllTargetSymbols();
         }
 
-        public double Execute()
+        public double Execute(CancellationToken cancellationToken = default)
         {
             var targetUsdtQuantity = GlobalSetting.TradeConfig.TargetUsdtQuantity;
             var targetRatio = GlobalSetting.TradeConfig.TradeTargetRatio;
 
             var triangularArbitrageExecutor = new CandidateGetter();
             using var historyWriter = new TradeHistoryWriter(GlobalSetting.TradeHistoryPath);
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
-                Thread.Sleep(1000);
+                Task.Delay(1000, cancellationToken).Wait(cancellationToken);
+                if (cancellationToken.IsCancellationRequested) break;
                 foreach (var candidate in triangularArbitrageExecutor.Execute(targetUsdtQuantity, targetRatio))
                 {
+                    if (cancellationToken.IsCancellationRequested) break;
                     Console.WriteLine(candidate);
                     try
                     {
@@ -51,6 +54,7 @@ namespace MexcTriangularArbitrage.Services
                     }
                 }
             }
+            return 0;
         }
 
         private double Bid(SymbolTicker symbolTicker, MarketDepth marketDepth, double keyCurrencyQuantity)
@@ -79,8 +83,8 @@ namespace MexcTriangularArbitrage.Services
                 };
 
                 var orderId = QueryExecutor.PostPlaceOrder(postData);
-                
-                if(orderId == null)
+
+                if (orderId == null)
                 {
                     continue;
                 }
@@ -88,7 +92,7 @@ namespace MexcTriangularArbitrage.Services
                 var dealHistoryList = QueryExecutor.GetDealHistory(symbolTicker.symbol);
                 var dealHistory = dealHistoryList.FirstOrDefault(_ => _.order_id == orderId);
 
-                if(dealHistory == null)
+                if (dealHistory == null)
                 {
                     continue;
                 }
@@ -110,13 +114,13 @@ namespace MexcTriangularArbitrage.Services
             var minAmount = symbolData.MinAmountAsDouble;
             var restSettlementQuantity = settlementCurrencyQuantity;
             foreach (var depthData in marketDepth.bids)
-            {   
+            {
                 if (restSettlementQuantity * depthData.PriceAsDouble <= minAmount)
                 {
                     break;
                 }
 
-                double sellableQuantity = Math.Min(restSettlementQuantity, depthData.QuantityAsDouble / depthData.PriceAsDouble); ;
+                double sellableQuantity = Math.Min(restSettlementQuantity, depthData.QuantityAsDouble / depthData.PriceAsDouble);
 
                 var postData = new PlaceOrderPostData
                 {
@@ -128,7 +132,7 @@ namespace MexcTriangularArbitrage.Services
                 };
 
                 var orderId = QueryExecutor.PostPlaceOrder(postData);
-                
+
                 if (orderId == null)
                 {
                     continue;
